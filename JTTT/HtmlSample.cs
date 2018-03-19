@@ -23,7 +23,7 @@ public class HtmlSample
         }
     }
 
-    public void FindByWord(string Word)
+    public string FindByWord(string Word)
     {
         var doc = new HtmlDocument();
         var pageHtml = GetPageHtml();
@@ -37,11 +37,13 @@ public class HtmlSample
             {
                 Console.WriteLine("Alt value: " + node.GetAttributeValue("alt", ""));
                 Console.WriteLine("Src value: " + node.GetAttributeValue("src", ""));
-                string fileName = "image.jpg", myStringWebResource = null;
+                string fileName = node.GetAttributeValue("alt", "").Replace(" ", "_"), myStringWebResource = null;
                 WebClient myWebClient = new WebClient();
                 myStringWebResource = node.GetAttributeValue("src", "");
                 myWebClient.DownloadFile(myStringWebResource, fileName);
-            }
+                return fileName;
+            }  
         }
+        return "";
     }
 }

@@ -25,7 +25,6 @@ namespace JTTT
 
         BindingList<Quest> list = new BindingList<Quest>();
 
-
         private void button1_Click(object sender, EventArgs a)
         {
             /*Quest quest = new Quest(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.Text, textBox4.Text);
@@ -34,19 +33,27 @@ namespace JTTT
             quest.executeQuest();*/
         }
 
+        //Dodawanie do listy - nie da się wyświetlić i wysłać równocześnie tego samego obrazu (jest już używany przez jakiś proces). 
         private void button6_Click(object sender, EventArgs e)
         {
             Quest quest = new Quest(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.Text, textBox4.Text);
             var hs = new HtmlSample(quest.q_url);
             quest.jpgPath = hs.FindByWord(quest.q_word);
-            quest.executeQuest();
             list.Add(quest);
-            
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        //Wykonywanie wszystkich operacji
+        private void button2_Click(object sender, EventArgs e)
         {
+            IEnumerator<Quest> i = list.GetEnumerator();
+            while (i.MoveNext())
+                i.Current.executeQuest();
+        }
 
+        //Czyszczenie listy
+        private void button3_Click(object sender, EventArgs e)
+        {
+            list.Clear();
         }
     }
 }

@@ -12,6 +12,7 @@ using MailKit;
 using MimeKit;
 using System.IO;
 using MimeKit.Utils;
+using System.Xml.Serialization;
 
 namespace JTTT
 {
@@ -23,7 +24,8 @@ namespace JTTT
             listBox1.DataSource = list;
         }
 
-        BindingList<Quest> list = new BindingList<Quest>();
+        static BindingList<Quest> list = new BindingList<Quest>();
+        
 
         private void button1_Click(object sender, EventArgs a)
         {
@@ -36,7 +38,8 @@ namespace JTTT
         //Dodawanie do listy - nie da się wyświetlić i wysłać równocześnie tego samego obrazu (jest już używany przez jakiś proces). 
         private void button6_Click(object sender, EventArgs e)
         {
-            Quest quest = new Quest(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.Text, textBox4.Text);
+            Quest quest = new Quest();
+            quest.create(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.Text, textBox4.Text);
             var hs = new HtmlSample(quest.q_url);
             quest.jpgPath = hs.FindByWord(quest.q_word);
             list.Add(quest);
@@ -54,6 +57,29 @@ namespace JTTT
         private void button3_Click(object sender, EventArgs e)
         {
             list.Clear();
+        }
+
+        //Serializacja
+        private void button4_Click(object sender, EventArgs e)
+        {
+            StreamWriter writer = new StreamWriter("list.xml");
+            XmlSerializer serializer = new XmlSerializer(typeof(BindingList<Quest>));
+            serializer.Serialize(writer, list);
+            writer.Flush();
+            writer.Close();
+
+        }
+
+        //Deserializacja
+        private void button5_Click(object sender, EventArgs e)
+        {
+            StreamReader reader = new StreamReader("list.xml");
+            XmlSerializer deserializer = new XmlSerializer(typeof(BindingList<Quest>));
+            object obj = deserializer.Deserialize(reader);
+            list = (BindingList<Quest>)obj;
+            listBox1.DataSource = list;
+            reader.Close();
+            File.Delete("list.xml");
         }
     }
 }

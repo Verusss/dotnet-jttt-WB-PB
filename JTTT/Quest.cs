@@ -11,7 +11,7 @@ using MimeKit.Utils;
 
 namespace JTTT
 {
-    class Quest
+    public class Quest
     {
         public string q_url;
         public string q_word;
@@ -20,7 +20,12 @@ namespace JTTT
         public string jpgPath;
         public string questName;
 
-        public Quest(string url, string word, string mail, string task, string name)
+        public Quest()
+        {
+            
+        }
+
+        public void create (string url, string word, string mail, string task, string name)
         {
             q_url = url;
             q_word = word;

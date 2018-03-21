@@ -22,35 +22,45 @@ namespace JTTT
         {
             InitializeComponent();
             listBox1.DataSource = list;
+            label5.Text = "Podaj parametry.";
         }
 
         static BindingList<Quest> list = new BindingList<Quest>();
-        
 
-        private void button1_Click(object sender, EventArgs a)
-        {
-            /*Quest quest = new Quest(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.Text, textBox4.Text);
-            var hs = new HtmlSample(quest.q_url);
-            quest.jpgPath=hs.FindByWord(quest.q_word);
-            quest.executeQuest();*/
-        }
-
-        //Dodawanie do listy - nie da się wyświetlić i wysłać równocześnie tego samego obrazu (jest już używany przez jakiś proces). 
+        //Dodawanie do listy
         private void button6_Click(object sender, EventArgs e)
         {
-            Quest quest = new Quest();
-            quest.create(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.Text, textBox4.Text);
-            var hs = new HtmlSample(quest.q_url);
-            quest.jpgPath = hs.FindByWord(quest.q_word);
-            list.Add(quest);
+            if (textBox1.Text == "" || textBox2.Text == "" || comboBox1.Text == "" || textBox4.Text == "" || comboBox1.Text=="Wyślij e-mailem" && textBox3.Text=="")
+                label5.Text = "Brakuje parametrów.";
+            else
+            {
+                Quest quest = new Quest();
+                quest.create(textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.Text, textBox4.Text);
+                var hs = new HtmlSample(quest.q_url);
+                quest.jpgPath = hs.FindByWord(quest.q_word, list.Count);
+                if (quest.jpgPath=="")
+                {
+                    quest.jpgPath = "image.jpg";
+                    label5.Text = "Nie znaleziono obrazu dla danego zadania. Dodano domyślny.";
+                }
+                else
+                    label5.Text = "Dodano zadanie.";
+                list.Add(quest);
+            }       
         }
 
         //Wykonywanie wszystkich operacji
         private void button2_Click(object sender, EventArgs e)
         {
-            IEnumerator<Quest> i = list.GetEnumerator();
-            while (i.MoveNext())
-                i.Current.executeQuest();
+            if (list.Count==0)
+                label5.Text = "Brak zadań do wykonania.";
+            else
+            {
+                label5.Text = "Wykonuję.";
+                IEnumerator<Quest> i = list.GetEnumerator();
+                while (i.MoveNext())
+                    i.Current.executeQuest();
+            }
         }
 
         //Czyszczenie listy
@@ -67,7 +77,6 @@ namespace JTTT
             serializer.Serialize(writer, list);
             writer.Flush();
             writer.Close();
-
         }
 
         //Deserializacja

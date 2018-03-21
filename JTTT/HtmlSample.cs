@@ -23,7 +23,7 @@ public class HtmlSample
         }
     }
 
-    public string FindByWord(string Word)
+    public string FindByWord(string Word, int count)
     {
         var doc = new HtmlDocument();
         var pageHtml = GetPageHtml();
@@ -37,7 +37,7 @@ public class HtmlSample
             {
                 Console.WriteLine("Alt value: " + node.GetAttributeValue("alt", ""));
                 Console.WriteLine("Src value: " + node.GetAttributeValue("src", ""));
-                string fileName = node.GetAttributeValue("alt", "").Replace(" ", "_"), myStringWebResource = null;
+                string fileName = node.GetAttributeValue("alt", "").Replace(" ", "_")+count, myStringWebResource = null;
                 WebClient myWebClient = new WebClient();
                 myStringWebResource = node.GetAttributeValue("src", "");
                 myWebClient.DownloadFile(myStringWebResource, fileName);

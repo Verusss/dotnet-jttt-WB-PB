@@ -93,7 +93,7 @@ namespace JTTT
 
         public override string ToString()
         {
-            string sQuest = taskName + url + word + taskType + mail + jpgPath;
+            string sQuest = taskName + " " + url + " " + word + " " + taskType + " " + mail;
             return sQuest;
         }
     }

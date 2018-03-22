@@ -40,8 +40,11 @@ public class HtmlSample
                 string fileName = node.GetAttributeValue("alt", "").Replace(" ", "_")+count, myStringWebResource = null;
                 WebClient myWebClient = new WebClient();
                 myStringWebResource = node.GetAttributeValue("src", "");
-                myWebClient.DownloadFile(myStringWebResource, fileName);
-                return fileName;
+                if (myStringWebResource != "" && fileName != "")
+                {
+                    myWebClient.DownloadFile(myStringWebResource, fileName);
+                    return fileName;
+                }                    
             }  
         }
         return "";

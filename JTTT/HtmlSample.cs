@@ -42,6 +42,7 @@ public class HtmlSample
                 myStringWebResource = node.GetAttributeValue("src", "");
                 if (myStringWebResource != "" && fileName != "")
                 {
+                    Console.WriteLine(myStringWebResource);
                     myWebClient.DownloadFile(myStringWebResource, fileName);
                     return fileName;
                 }                    

@@ -7,9 +7,6 @@ using System.Threading.Tasks;
 
 namespace JTTT
 {
-    //class WeatherManager
-    //{
-    //}
     public partial class WeatherInfo
     {
         [JsonProperty("coord")]

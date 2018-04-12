@@ -18,15 +18,18 @@ namespace JTTT
 {
     public partial class FormMain : Form
     {
+        DbManager dbmgr = new DbManager();
+        static BindingList<Task> list = new BindingList<Task>();
+
         public FormMain()
         {
             InitializeComponent();
+            list = dbmgr.GetBindingList();
             listBox_listaZadania.DataSource = list;
             label_komunikat.Text = "Podaj parametry.";
+            //dbmgr.AddExamples();
         }
-
-        static BindingList<Task> list = new BindingList<Task>();
-
+        
         //Dodawanie do listy
         private void button_dodajDoListy_Click(object sender, EventArgs e)
         {
@@ -36,16 +39,10 @@ namespace JTTT
             {
                 Task quest = new Task();
                 quest.Create(textBox_url.Text, textBox_slowo.Text, textBox_email.Text, comboBox_akcja.Text, textBox_nazwaZadania.Text);
-                var hs = new HtmlSample(quest.url);
-                quest.jpgPath = hs.FindByWord(quest.word, list.Count);
-                if (quest.jpgPath == "")
-                {
-                    quest.jpgPath = "image.jpg";
-                    label_komunikat.Text = "Nie znaleziono obrazu dla danego zadania. Dodano domyślny.";
-                }
-                else
-                    label_komunikat.Text = "Dodano zadanie.";
+                quest.JpgPath = "";
                 list.Add(quest);
+                dbmgr.AddTask(quest);
+                label_komunikat.Text = "Dodano zadanie.";
             }
         }
 
@@ -56,17 +53,41 @@ namespace JTTT
                 label_komunikat.Text = "Brak zadań do wykonania.";
             else
             {
+                string text = "";
                 label_komunikat.Text = "Wykonuję.";
                 IEnumerator<Task> i = list.GetEnumerator();
                 while (i.MoveNext())
+                {
                     i.Current.ExecuteQuest();
+                    if (i.Current.JpgPath != "")
+                    {
+                        text += i.Current.TaskName + ", ";
+                    }
+                }
+                text = text.Substring(0, text.Length - 2);
+                label_komunikat.Text = "Wykonano zadania: " + text + ";";
             }
         }
 
         //Czyszczenie listy
         private void button_czysc_Click(object sender, EventArgs e)
         {
-            list.Clear();
+            var index = listBox_listaZadania.SelectedIndex;
+            if (index != -1)
+            {
+                Task t = list[index];
+                list.RemoveAt(index);
+                DialogResult dialogResult = MessageBox.Show("Czy chcesz usunąć to zadanie również z bazy danych?", "", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    dbmgr.DelTask(t);
+                }
+                label_komunikat.Text = $"Usunięto z listy zadanie o indeksie {index}.";
+            }
+            else
+            {
+                label_komunikat.Text = "Lista jest pusta.";
+            }
         }
 
         //Serializacja

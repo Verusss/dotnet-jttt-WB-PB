@@ -89,7 +89,7 @@ namespace JTTT
         {
             string wantedJpgPath = TaskName + Id.ToString() + ".jpg";
             var hs = new HtmlSample(Url);
-            JpgPath = hs.FindByWord(Word, wantedJpgPath);
+            JpgPath = hs.FindByWord(Word, wantedJpgPath, Url);
         }
 
         public void ExecuteQuest()

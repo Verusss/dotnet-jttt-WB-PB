@@ -32,7 +32,7 @@ public class HtmlSample
         }
     }
 
-    public string FindByWord(string Word, string Path)
+    public string FindByWord(string Word, string Path, string Url)
     {
         var doc = new HtmlDocument();
         var pageHtml = GetPageHtml();
@@ -53,6 +53,8 @@ public class HtmlSample
                 myStringWebResource = node.GetAttributeValue("src", null);
                 if (myStringWebResource != null)
                 {
+                    if (!myStringWebResource.Contains("http"))
+                        myStringWebResource = Url + myStringWebResource;
                     myWebClient.DownloadFile(myStringWebResource, Path);
                     if (File.Exists(Path))
                         return Path;

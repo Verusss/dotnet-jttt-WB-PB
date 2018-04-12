@@ -137,5 +137,11 @@ namespace JTTT
             label_komunikat.Text = "Przywrócono z pliku.";
             logger.Log("Dane zostały zdeserializowane. Plik usunięto.");
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Form_Weather form = new Form_Weather();
+            form.ShowDialog();
+        }
     }
 }

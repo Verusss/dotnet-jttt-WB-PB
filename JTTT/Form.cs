@@ -20,6 +20,7 @@ namespace JTTT
     {
         DbManager dbmgr = new DbManager();
         static BindingList<Task> list = new BindingList<Task>();
+        Logger logger = new Logger();
 
         public FormMain()
         {
@@ -27,22 +28,39 @@ namespace JTTT
             list = dbmgr.GetBindingList();
             listBox_listaZadania.DataSource = list;
             label_komunikat.Text = "Podaj parametry.";
+
             //dbmgr.AddExamples();
+            logger.Log("Rozpoczęto działanie programu.");
         }
-        
+
         //Dodawanie do listy
         private void button_dodajDoListy_Click(object sender, EventArgs e)
         {
             if (textBox_url.Text == "" || textBox_slowo.Text == "" || comboBox_akcja.Text == "" || textBox_nazwaZadania.Text == "" || comboBox_akcja.Text == "Wyślij e-mailem" && textBox_email.Text == "")
+            {
                 label_komunikat.Text = "Brakuje parametrów.";
+                logger.Log("Dodanie do listy nie powiodło się. Stan pól TextBox: URL = " + textBox_url.Text + "; Słowo = " + textBox_slowo.Text + "; Akcja = " + comboBox_akcja.Text + "; Nazwa = " + textBox_nazwaZadania.Text + "; Mail = " + textBox_email.Text);
+            }
             else
             {
                 Task quest = new Task();
+
+                var hs = new HtmlSample(textBox_url.Text);
+                string testPage = hs.GetPageHtml();
+                if (testPage == "")
+                {
+                    label_komunikat.Text = "Popraw url i spróbuj ponownie.";
+                    logger.Log($"Niepoprawny url: {testPage}");
+                    return;
+                }
+
                 quest.Create(textBox_url.Text, textBox_slowo.Text, textBox_email.Text, comboBox_akcja.Text, textBox_nazwaZadania.Text);
                 quest.JpgPath = "";
                 list.Add(quest);
                 dbmgr.AddTask(quest);
                 label_komunikat.Text = "Dodano zadanie.";
+                logger.Log($"Dodano zadanie: {quest}");
+
             }
         }
 
@@ -50,7 +68,9 @@ namespace JTTT
         private void button_wykonaj_Click(object sender, EventArgs e)
         {
             if (list.Count == 0)
+            {
                 label_komunikat.Text = "Brak zadań do wykonania.";
+            }
             else
             {
                 string text = "";
@@ -66,6 +86,7 @@ namespace JTTT
                 }
                 text = text.Substring(0, text.Length - 2);
                 label_komunikat.Text = "Wykonano zadania: " + text + ";";
+                logger.Log("Wykonano zadania: " + text + ";");
             }
         }
 
@@ -81,6 +102,7 @@ namespace JTTT
                 if (dialogResult == DialogResult.Yes)
                 {
                     dbmgr.DelTask(t);
+                    logger.Log($"Usunięto zadanie z bazy danych: {t}");
                 }
                 label_komunikat.Text = $"Usunięto z listy zadanie o indeksie {index}.";
             }
@@ -98,6 +120,8 @@ namespace JTTT
             serializer.Serialize(writer, list);
             writer.Flush();
             writer.Close();
+            label_komunikat.Text = "Zapisano.";
+            logger.Log("Dane zostały zserializowane.");
         }
 
         //Deserializacja
@@ -110,6 +134,8 @@ namespace JTTT
             listBox_listaZadania.DataSource = list;
             reader.Close();
             File.Delete("list.xml");
+            label_komunikat.Text = "Przywrócono z pliku.";
+            logger.Log("Dane zostały zdeserializowane. Plik usunięto.");
         }
     }
 }

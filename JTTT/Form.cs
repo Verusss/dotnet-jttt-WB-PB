@@ -18,14 +18,18 @@ namespace JTTT
 {
     public partial class FormMain : Form
     {
+        DbManager dbmgr = new DbManager();
         static BindingList<Task> list = new BindingList<Task>();
         Logger logger = new Logger();
 
         public FormMain()
         {
             InitializeComponent();
+            list = dbmgr.GetBindingList();
             listBox_listaZadania.DataSource = list;
             label_komunikat.Text = "Podaj parametry.";
+
+            //dbmgr.AddExamples();
             logger.Log("Rozpoczęto działanie programu.");
         }
 
@@ -40,21 +44,23 @@ namespace JTTT
             else
             {
                 Task quest = new Task();
+
+                var hs = new HtmlSample(textBox_url.Text);
+                string testPage = hs.GetPageHtml();
+                if (testPage == "")
+                {
+                    label_komunikat.Text = "Popraw url i spróbuj ponownie.";
+                    logger.Log($"Niepoprawny url: {testPage}");
+                    return;
+                }
+
                 quest.Create(textBox_url.Text, textBox_slowo.Text, textBox_email.Text, comboBox_akcja.Text, textBox_nazwaZadania.Text);
-                var hs = new HtmlSample(quest.url);
-                quest.jpgPath = hs.FindByWord(quest.word, list.Count);
-                if (quest.jpgPath == "")
-                {
-                    quest.jpgPath = "image.jpg";
-                    label_komunikat.Text = "Nie znaleziono obrazu dla danego zadania. Dodano domyślny.";
-                    logger.Log("Nie znaleziono obrazu. Dodano domyślny.");
-                }
-                else
-                {
-                    label_komunikat.Text = "Dodano zadanie.";
-                    logger.Log("Dodano zadanie: " + textBox_nazwaZadania.Text);
-                }
+                quest.JpgPath = "";
                 list.Add(quest);
+                dbmgr.AddTask(quest);
+                label_komunikat.Text = "Dodano zadanie.";
+                logger.Log($"Dodano zadanie: {quest}");
+
             }
         }
 
@@ -64,24 +70,46 @@ namespace JTTT
             if (list.Count == 0)
             {
                 label_komunikat.Text = "Brak zadań do wykonania.";
-                logger.Log("Wykonaj => Nie ma zadań do wykonania.");
             }
             else
             {
+                string text = "";
                 label_komunikat.Text = "Wykonuję.";
                 IEnumerator<Task> i = list.GetEnumerator();
                 while (i.MoveNext())
+                {
                     i.Current.ExecuteQuest();
-                logger.Log("Wykonaj => Wykonano wszystkie zadania.");
+                    if (i.Current.JpgPath != "")
+                    {
+                        text += i.Current.TaskName + ", ";
+                    }
+                }
+                text = text.Substring(0, text.Length - 2);
+                label_komunikat.Text = "Wykonano zadania: " + text + ";";
+                logger.Log("Wykonano zadania: " + text + ";");
             }
         }
 
         //Czyszczenie listy
         private void button_czysc_Click(object sender, EventArgs e)
-        {  
-            list.Clear();
-            label_komunikat.Text = "Wyczyszczono.";
-            logger.Log("Wyczyszczono listę.\n");
+        {
+            var index = listBox_listaZadania.SelectedIndex;
+            if (index != -1)
+            {
+                Task t = list[index];
+                list.RemoveAt(index);
+                DialogResult dialogResult = MessageBox.Show("Czy chcesz usunąć to zadanie również z bazy danych?", "", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    dbmgr.DelTask(t);
+                    logger.Log($"Usunięto zadanie z bazy danych: {t}");
+                }
+                label_komunikat.Text = $"Usunięto z listy zadanie o indeksie {index}.";
+            }
+            else
+            {
+                label_komunikat.Text = "Lista jest pusta.";
+            }
         }
 
         //Serializacja

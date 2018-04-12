@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using System;
+using System.IO;
 using System.Net;
 using System.Text;
 
@@ -16,17 +17,27 @@ public class HtmlSample
     {
         using (var wc = new WebClient())
         {
+            string html = "";
             wc.Encoding = Encoding.UTF8;
-            var html = System.Net.WebUtility.HtmlDecode(wc.DownloadString(_url));
+            try
+            {
+                html = System.Net.WebUtility.HtmlDecode(wc.DownloadString(_url));
+            }
+            catch (System.Net.WebException)
+            {
+                html = "";
+            }
 
             return html;
         }
     }
 
-    public string FindByWord(string Word, int count)
+    public string FindByWord(string Word, string Path)
     {
         var doc = new HtmlDocument();
         var pageHtml = GetPageHtml();
+        if (pageHtml == "")
+            return "";
         doc.LoadHtml(pageHtml);
         var nodes = doc.DocumentNode.Descendants("img");
         string title;
@@ -37,14 +48,14 @@ public class HtmlSample
             {
                 Console.WriteLine("Alt value: " + node.GetAttributeValue("alt", ""));
                 Console.WriteLine("Src value: " + node.GetAttributeValue("src", ""));
-                string fileName = node.GetAttributeValue("alt", "").Replace(" ", "_")+count, myStringWebResource = null;
                 WebClient myWebClient = new WebClient();
-                myStringWebResource = node.GetAttributeValue("src", "");
-                if (myStringWebResource != "" && fileName != "")
+                string myStringWebResource = null;
+                myStringWebResource = node.GetAttributeValue("src", null);
+                if (myStringWebResource != null)
                 {
-                    Console.WriteLine(myStringWebResource);
-                    myWebClient.DownloadFile(myStringWebResource, fileName);
-                    return fileName;
+                    myWebClient.DownloadFile(myStringWebResource, Path);
+                    if (File.Exists(Path))
+                        return Path;
                 }                    
             }  
         }

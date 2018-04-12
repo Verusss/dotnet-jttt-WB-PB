@@ -118,6 +118,7 @@ namespace JTTT
             // listBox_listaZadania
             // 
             this.listBox_listaZadania.FormattingEnabled = true;
+            this.listBox_listaZadania.HorizontalScrollbar = true;
             this.listBox_listaZadania.Location = new System.Drawing.Point(344, 31);
             this.listBox_listaZadania.Margin = new System.Windows.Forms.Padding(2);
             this.listBox_listaZadania.Name = "listBox_listaZadania";

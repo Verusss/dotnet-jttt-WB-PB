@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using MailKit.Net.Smtp;
 using MailKit;
 using MimeKit.Utils;
+using System.Net;
 
 namespace JTTT
 {
@@ -18,6 +19,11 @@ namespace JTTT
         public string TaskType { get; set; }
         public string JpgPath { get; set; }
         public string TaskName { get; set; }
+        public string City { get; set; }
+        public string Json { get; set; }
+        public string TypeTempHeight { get; set; }
+        public decimal TempHeight { get; set; }
+        public string ConditionType { get; set; }
 
         public Task()
         {
@@ -27,15 +33,37 @@ namespace JTTT
             TaskType = "";
             JpgPath = "";
             TaskName = "";
+            City = "";
+            Json = "";
+            TypeTempHeight = "";
+            TempHeight = 0;
+            ConditionType = "";
+        }
+        public void downloadJson()
+        {
+            using (var wc = new WebClient())
+            {
+                Json = wc.DownloadString("http://api.openweathermap.org/data/2.5/weather?q=" + City + "&appid=7ad1f6088aa81ee7d1f348c2370adaf7");
+                Console.WriteLine(Json);
+            }
         }
 
-        public void Create(string _url, string _word, string _mail, string _type, string _name)
+        public void Create(string _url, string _word, string _mail, string _type, string _name, string _city, string _typeTemp, decimal _temp, string _conditionType)
         {
             Url = _url;
             Word = _word;
             Mail = _mail;
             TaskType = _type;
             TaskName = _name;
+            if (_city!="")
+            {
+                City = _city;
+                replace_Polish_Charakters();
+                downloadJson();
+                TypeTempHeight = _typeTemp;
+                TempHeight = _temp;
+            }
+            ConditionType = _conditionType;
         }
 
         public void ShowImage()
@@ -94,19 +122,44 @@ namespace JTTT
 
         public void ExecuteQuest()
         {
-            UpdateImagePath();
-            if (JpgPath != "")
+            if (ConditionType=="Slowo")
             {
-                if (TaskType == "Wyślij e-mailem")
-                    SendMail();
-                else if (TaskType == "Wyświetl obraz")
-                    ShowImage();
+                UpdateImagePath();
+                if (JpgPath != "")
+                {
+                    if (TaskType == "Wyślij e-mailem")
+                        SendMail();
+                    else if (TaskType == "Wyświetl obraz")
+                        ShowImage();
+                }
+            }
+            else if (ConditionType=="Pogoda")
+            {
+                Console.WriteLine(City);
             }
         }
 
         public override string ToString()
         {
-            return $"taskName:{TaskName}, url:{Url}, word:{Word}, taskType:{TaskType}, mail:{Mail}, jpgPath:{JpgPath}";
+            return $"taskName:{TaskName}";//, url:{Url}, word:{Word}, taskType:{TaskType}, mail:{Mail}, jpgPath:{JpgPath}";
+        }
+
+        public void replace_Polish_Charakters()
+        {
+            City = City.Replace("ą", "a");
+            City = City.Replace("ć", "c");
+            City = City.Replace("ę", "e");
+            City = City.Replace("ł", "l");
+            City = City.Replace("ń", "n");
+            City = City.Replace("ó", "o");
+            City = City.Replace("ś", "s");
+            City = City.Replace("ź", "z");
+            City = City.Replace("ż", "z");
+            City = City.Replace("Ł", "L");
+            City = City.Replace("Ć", "C");
+            City = City.Replace("Ś", "S");
+            City = City.Replace("Ź", "Z");
+            City = City.Replace("Ż", "Z");
         }
     }
 }

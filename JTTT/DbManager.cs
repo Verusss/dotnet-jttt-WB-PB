@@ -39,7 +39,7 @@ namespace JTTT
             return list;
         }
 
-        public void AddExamples()
+        /*public void AddExamples()
         {
             using (var ctx = new JTTTDbContext())
             {
@@ -57,6 +57,6 @@ namespace JTTT
                 //ctx.Task.Add(t);
                 //ctx.SaveChanges();
             }
-        }
+        }*/
     }
 }

@@ -28,7 +28,6 @@ namespace JTTT
             list = dbmgr.GetBindingList();
             listBox_listaZadania.DataSource = list;
             label_komunikat.Text = "Podaj parametry.";
-
             //dbmgr.AddExamples();
             logger.Log("Rozpoczęto działanie programu.");
         }
@@ -36,7 +35,7 @@ namespace JTTT
         //Dodawanie do listy
         private void button_dodajDoListy_Click(object sender, EventArgs e)
         {
-            if (textBox_url.Text == "" || textBox_slowo.Text == "" || comboBox_akcja.Text == "" || textBox_nazwaZadania.Text == "" || comboBox_akcja.Text == "Wyślij e-mailem" && textBox_email.Text == "")
+            if (tabControl1.SelectedTab.Text == "Slowo" && (textBox_url.Text == "" || textBox_slowo.Text == "" || comboBox_akcja.Text == "" || textBox_nazwaZadania.Text == "" || comboBox_akcja.Text == "Wyślij e-mailem" && textBox_email.Text == "") || tabControl1.SelectedTab.Text == "Pogoda"  && (textBox1.Text == "" || comboBox1.Text == "" || comboBox_akcja.Text == "" || textBox_nazwaZadania.Text == "" || comboBox_akcja.Text == "Wyślij e-mailem" && textBox_email.Text == ""))
             {
                 label_komunikat.Text = "Brakuje parametrów.";
                 logger.Log("Dodanie do listy nie powiodło się. Stan pól TextBox: URL = " + textBox_url.Text + "; Słowo = " + textBox_slowo.Text + "; Akcja = " + comboBox_akcja.Text + "; Nazwa = " + textBox_nazwaZadania.Text + "; Mail = " + textBox_email.Text);
@@ -44,17 +43,19 @@ namespace JTTT
             else
             {
                 Task quest = new Task();
-
-                var hs = new HtmlSample(textBox_url.Text);
-                string testPage = hs.GetPageHtml();
-                if (testPage == "")
+                if (tabControl1.SelectedTab.Text == "Slowo")
                 {
-                    label_komunikat.Text = "Popraw url i spróbuj ponownie.";
-                    logger.Log($"Niepoprawny url: {testPage}");
-                    return;
+                    var hs = new HtmlSample(textBox_url.Text);
+                    string testPage = hs.GetPageHtml();
+                    if (testPage == "")
+                    {
+                        label_komunikat.Text = "Popraw url i spróbuj ponownie.";
+                        logger.Log($"Niepoprawny url: {testPage}");
+                        return;
+                    }
                 }
 
-                quest.Create(textBox_url.Text, textBox_slowo.Text, textBox_email.Text, comboBox_akcja.Text, textBox_nazwaZadania.Text);
+                quest.Create(textBox_url.Text, textBox_slowo.Text, textBox_email.Text, comboBox_akcja.Text, textBox_nazwaZadania.Text, textBox1.Text, comboBox1.Text , numericUpDown1.Value, tabControl1.SelectedTab.Text);
                 quest.JpgPath = "";
                 list.Add(quest);
                 dbmgr.AddTask(quest);
@@ -79,13 +80,13 @@ namespace JTTT
                 while (i.MoveNext())
                 {
                     i.Current.ExecuteQuest();
-                    if (i.Current.JpgPath != "")
+                    /*if (i.Current.JpgPath != "")
                     {
                         text += i.Current.TaskName + ", ";
-                    }
+                    }*/
                 }
-                text = text.Substring(0, text.Length - 2);
-                label_komunikat.Text = "Wykonano zadania: " + text + ";";
+                //text = text.Substring(0, text.Length - 2);
+                //label_komunikat.Text = "Wykonano zadania: " + text + ";";
                 logger.Log("Wykonano zadania: " + text + ";");
             }
         }

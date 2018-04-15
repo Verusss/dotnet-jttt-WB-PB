@@ -7,6 +7,7 @@ using MailKit.Net.Smtp;
 using MailKit;
 using MimeKit.Utils;
 using System.Net;
+using Newtonsoft.Json;
 
 namespace JTTT
 {
@@ -39,13 +40,14 @@ namespace JTTT
             TempHeight = 0;
             ConditionType = "";
         }
-        public void downloadJson()
+        public string downloadJson()
         {
             using (var wc = new WebClient())
             {
                 Json = wc.DownloadString("http://api.openweathermap.org/data/2.5/weather?q=" + City + "&appid=7ad1f6088aa81ee7d1f348c2370adaf7");
                 Console.WriteLine(Json);
             }
+            return Json;
         }
 
         public void Create(string _url, string _word, string _mail, string _type, string _name, string _city, string _typeTemp, decimal _temp, string _conditionType)
@@ -77,29 +79,32 @@ namespace JTTT
             form.Show();
         }
 
-        public void SendMail ()
+        public void SendMail (string _subject, string _text)
         {
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress("Genowefa", "genowefa.strudel@gmail.com"));
             message.To.Add(new MailboxAddress("Test", Mail));
-            message.Subject = "Obrazek na dziś!";
+            message.Subject = _subject;
             var body = new TextPart("plain")
             {
-                Text = @"Obrazek na dziś!"
-            };
-
-            var attachment = new MimePart("image", "jpg")
-            {
-                Content = new MimeContent(File.OpenRead(JpgPath), ContentEncoding.Default),
-                ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
-                ContentTransferEncoding = ContentEncoding.Base64,
-                FileName = Path.GetFileName(JpgPath)
+                Text = _text
             };
 
             var multipart = new Multipart("mixed");
             multipart.Add(body);
-            multipart.Add(attachment);
+
+            if (ConditionType=="Slowo")
+            {
+                var attachment = new MimePart("image", "jpg")
+                {
+                    Content = new MimeContent(File.OpenRead(JpgPath), ContentEncoding.Default),
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                    ContentTransferEncoding = ContentEncoding.Base64,
+                    FileName = Path.GetFileName(JpgPath)
+                };
+                multipart.Add(attachment);
+            }
 
             message.Body = multipart;
 
@@ -128,20 +133,28 @@ namespace JTTT
                 if (JpgPath != "")
                 {
                     if (TaskType == "Wyślij e-mailem")
-                        SendMail();
+                        SendMail("Obrazek na dziś!", "Obrazek na dziś!");
                     else if (TaskType == "Wyświetl obraz")
                         ShowImage();
                 }
             }
             else if (ConditionType=="Pogoda")
             {
-                Console.WriteLine(City);
+                string Json = downloadJson();
+                WeatherInfo weatherInfo = JsonConvert.DeserializeObject<WeatherInfo>(Json);
+                if (TypeTempHeight== "wyższa niż" && weatherInfo.Main.Temp > Convert.ToDouble(TempHeight) || TypeTempHeight == "niższa niż" && weatherInfo.Main.Temp < Convert.ToDouble(TempHeight))
+                {
+                    string weather = $"Temperatura wynosi dzisiaj {weatherInfo.Main.Temp-273} st. Celcjusza. Ciśnienie {weatherInfo.Main.Pressure} hPa."; 
+                    if (TaskType == "Wyślij e-mailem")
+                        SendMail("Pogoda na dziś!", weather);
+                    Console.WriteLine(City);
+                }             
             }
         }
 
         public override string ToString()
         {
-            return $"taskName:{TaskName}";//, url:{Url}, word:{Word}, taskType:{TaskType}, mail:{Mail}, jpgPath:{JpgPath}";
+            return $"Task Name: {TaskName}";//, url:{Url}, word:{Word}, taskType:{TaskType}, mail:{Mail}, jpgPath:{JpgPath}";
         }
 
         public void replace_Polish_Charakters()

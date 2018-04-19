@@ -35,7 +35,16 @@ namespace JTTT
         //Dodawanie do listy
         private void button_dodajDoListy_Click(object sender, EventArgs e)
         {
-            if (tabControl1.SelectedTab.Text == "Slowo" && (textBox_url.Text == "" || textBox_slowo.Text == "" || comboBox_akcja.Text == "" || textBox_nazwaZadania.Text == "" || comboBox_akcja.Text == "Wyślij e-mailem" && textBox_email.Text == "") || tabControl1.SelectedTab.Text == "Pogoda"  && (textBox1.Text == "" || comboBox1.Text == "" || comboBox_akcja.Text == "" || textBox_nazwaZadania.Text == "" || comboBox_akcja.Text == "Wyślij e-mailem" && textBox_email.Text == ""))
+            if (tabControl1.SelectedTab.Text == "Slowo" && (textBox_url.Text == "" 
+                || textBox_slowo.Text == "" || comboBox_akcja.Text == "" || textBox_nazwaZadania.Text == "" 
+                || comboBox_akcja.Text == "Wyślij e-mailem" && textBox_email.Text == "") 
+
+                || tabControl1.SelectedTab.Text == "Pogoda"  && comboBox_akcja.Text == "Wyślij e-mailem"
+                && (textBox1.Text == "" || comboBox1.Text == "" || comboBox_akcja.Text == "" || textBox_email.Text == "" || textBox_nazwaZadania.Text == "")
+
+                || tabControl1.SelectedTab.Text == "Pogoda" && comboBox_akcja.Text == "Wyświetl obraz" 
+                && (textBox1.Text == "" || textBox_nazwaZadania.Text == "")
+                )
             {
                 label_komunikat.Text = "Brakuje parametrów.";
                 logger.Log("Dodanie do listy nie powiodło się. Stan pól TextBox: URL = " + textBox_url.Text + "; Słowo = " + textBox_slowo.Text + "; Akcja = " + comboBox_akcja.Text + "; Nazwa = " + textBox_nazwaZadania.Text + "; Mail = " + textBox_email.Text);
@@ -55,7 +64,16 @@ namespace JTTT
                     }
                 }
 
-                quest.Create(textBox_url.Text, textBox_slowo.Text, textBox_email.Text, comboBox_akcja.Text, textBox_nazwaZadania.Text, textBox1.Text, comboBox1.Text , numericUpDown1.Value, tabControl1.SelectedTab.Text);
+                try
+                {
+                    quest.Create(textBox_url.Text, textBox_slowo.Text, textBox_email.Text, comboBox_akcja.Text, textBox_nazwaZadania.Text, textBox1.Text, comboBox1.Text, numericUpDown1.Value, tabControl1.SelectedTab.Text);
+                }
+                catch (System.Net.WebException)
+                {
+                    label_komunikat.Text = "Upewnij się że podajesz poprawną nazwę miejscowości";
+                    logger.Log("quest.Create -> System.Net.WebException");
+                    return;
+                }
                 quest.JpgPath = "";
                 list.Add(quest);
                 dbmgr.AddTask(quest);
@@ -116,6 +134,11 @@ namespace JTTT
         //Serializacja
         private void button_serializacja_Click(object sender, EventArgs e)
         {
+            if (list.Count == 0)
+            {
+                label_komunikat.Text = "Lista jest pusta.";
+                return;
+            }
             StreamWriter writer = new StreamWriter("list.xml");
             XmlSerializer serializer = new XmlSerializer(typeof(BindingList<Task>));
             serializer.Serialize(writer, list);
@@ -128,6 +151,11 @@ namespace JTTT
         //Deserializacja
         private void button_deserializacja_Click(object sender, EventArgs e)
         {
+            if (list.Count == 0)
+            {
+                label_komunikat.Text = "Lista jest pusta.";
+                return;
+            }
             StreamReader reader = new StreamReader("list.xml");
             XmlSerializer deserializer = new XmlSerializer(typeof(BindingList<Task>));
             object obj = deserializer.Deserialize(reader);

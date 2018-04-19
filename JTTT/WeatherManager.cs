@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -7,25 +8,25 @@ using System.Threading.Tasks;
 
 namespace JTTT
 {
-    class WeatherManager
+    public class WeatherManager
     {
-        public string json { get; set; }
-        public string City { get; set; }
+        public string City;
+        public string Json;
+        public WeatherInfo weatherInfo;
+
         public WeatherManager(string CityName)
         {
             City = CityName;
-        }
-        
-        public void downloadJson()
-        {
+            replace_Polish_Characters();
             using (var wc = new WebClient())
             {
-                json = wc.DownloadString("http://api.openweathermap.org/data/2.5/weather?q=" + City + "&appid=7ad1f6088aa81ee7d1f348c2370adaf7");
-                Console.WriteLine(json);
+                Json = wc.DownloadString("http://api.openweathermap.org/data/2.5/weather?q=" + City + "&appid=7ad1f6088aa81ee7d1f348c2370adaf7");
+                weatherInfo = JsonConvert.DeserializeObject<WeatherInfo>(Json);
             }
+            
         }
 
-        public string replace_Polish_Charakters()
+        public string replace_Polish_Characters()
         {
             City = City.Replace("ą", "a");
             City = City.Replace("ć", "c");

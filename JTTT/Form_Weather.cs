@@ -22,20 +22,39 @@ namespace JTTT
 
         private void button1_Click(object sender, EventArgs e)
         {
-            WeatherManager weatherManager = new WeatherManager(textBox1.Text);
-            weatherManager.replace_Polish_Charakters();            
-            weatherManager.downloadJson();
-            WeatherInfo WeatherNow = JsonConvert.DeserializeObject<WeatherInfo>(weatherManager.json);
-            label2.Text = $"Temperatura w {weatherManager.City} wynosi teraz {WeatherNow.Main.Temp-273} st. Celcjusza. Prędkość wiatru wynosi {WeatherNow.Wind.Speed} m/s, a ciśnienie {WeatherNow.Main.Pressure} hPa.";
+            if (textBox1.Text == "")
+                return;
+            Run(textBox1.Text);
+        }
 
-            string IconUrl = "http://openweathermap.org/img/w/" + WeatherNow.Weather[0].Icon + ".png";
-            string IconPath = WeatherNow.Weather[0].Icon + ".png";
+        public void Run(string city)
+        {
+            WeatherManager mgr;
+            try
+            {
+                mgr = new WeatherManager(city);
+            }
+            catch (System.Net.WebException)
+            {
+                label2.Text = "Nie znalaziono takiego miasta.";
+                pictureBox1.Image = null;
+                return;
+            }
+            WeatherInfo weatherInfo = mgr.weatherInfo;
+            label2.Text = $"Temperatura w {weatherInfo.Name} wynosi teraz {weatherInfo.Main.Temp - 273} st. Celcjusza. Prędkość wiatru wynosi {weatherInfo.Wind.Speed} m/s, a ciśnienie {weatherInfo.Main.Pressure} hPa.";
+            string IconUrl = "http://openweathermap.org/img/w/" + weatherInfo.Weather[0].Icon + ".png";
+            string IconPath = weatherInfo.Weather[0].Icon + ".png";
             var hs = new HtmlSample(IconUrl);
             WebClient IconClient = new WebClient();
             IconClient.DownloadFile(IconUrl, IconPath);
             pictureBox1.ImageLocation = IconPath;
         }
 
-
+        public Form_Weather(string city)
+        {
+            InitializeComponent();
+            textBox1.Text = city;
+            Run(city);
+        }
     }
 }

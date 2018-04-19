@@ -133,6 +133,7 @@ namespace JTTT
             {
                 if (TaskType == "Wyślij e-mailem")
                 {
+                    Wmgr = new WeatherManager(City);
                     if (TypeTempHeight == "wyższa niż" && Wmgr.weatherInfo.Main.Temp > Convert.ToDouble(TempHeight) || TypeTempHeight == "niższa niż" && Wmgr.weatherInfo.Main.Temp < Convert.ToDouble(TempHeight))
                     {
                         string weather = $"Temperatura wynosi dzisiaj {Wmgr.weatherInfo.Main.Temp - 273} st. Celcjusza. Ciśnienie {Wmgr.weatherInfo.Main.Pressure} hPa.";
